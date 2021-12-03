@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 
 
@@ -6,8 +6,9 @@ const Country = ({ country, onSearchChange}) => {
   
   const handleShowClick = (event) => {
     console.log(country)
-    console.log(onSearchChange)
-    onSearchChange(country.name.common)
+    //console.log(onSearchChange)
+    
+
   }
 
   return <li>{country.name.common} <button value={country.name.common} onClick={handleShowClick}>show</button></li>
@@ -34,6 +35,7 @@ const CountryDetails = ({ country }) => {
 }
 
 const Countries = ({ countries, onSearchChange }) => {
+
   if (countries.length > 10) {
     return (
       <div>
@@ -46,7 +48,7 @@ const Countries = ({ countries, onSearchChange }) => {
       <>
         <ul>
           {countries.map(country => {
-            return <Country key={country.ccn3} country={country} onSearchChange={onSearchChange}/>
+            return <Country key={country.ccn3} country={country} onSearchChange={setCurrentCountries}/>
           })}
         </ul>
         <div>Matches: {countries.length}</div>
@@ -62,7 +64,7 @@ const Countries = ({ countries, onSearchChange }) => {
     return (
       <div>
         No results
-        <div>Matches: {countries.length}</div>
+        <div>Matches: {currentCountries.length}</div>
       </div>
     )
   }
