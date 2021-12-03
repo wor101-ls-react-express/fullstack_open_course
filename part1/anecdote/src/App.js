@@ -33,7 +33,6 @@ function App() {
 
   const [selected, setSelected] = useState(0)
   const [votes, setVotes] = useState({})
-  const [mostPopular, setMostPopular] = useState(0)
 
   const selectRandomAnecdote = () => setSelected(Math.floor(Math.random() * (anecdotes.length - 1)))
   const updateVotes = () => {
@@ -42,13 +41,12 @@ function App() {
     console.log(newVotes)
     setVotes(newVotes)
   }
-  const selectMostPopularAnecdote = () => setMostPopular(mostVotes());
-
-  const mostVotes = () => {
+  const mostVotes = (votes) => {
     let currentMax = 0;
     let votesKey = 0;
     Object.keys(votes).forEach(key => {
       if (votes[key] > currentMax) {
+        currentMax = votes[key]
         votesKey = key;
       }
     })
@@ -63,7 +61,7 @@ function App() {
       <Button handleClick={updateVotes} text="vote"/>
       <br/>
       <Header title="Anecdote with most votes"/>
-      <Anecdote anecdote={anecdotes[mostPopular]} votes={votes[selected]}/>
+      <Anecdote anecdote={anecdotes[mostVotes(votes)]} votes={votes[mostVotes(votes)]}/>
     </div>
   );
 }
