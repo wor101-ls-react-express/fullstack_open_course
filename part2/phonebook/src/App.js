@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
 import Persons from './components/Numbers'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
+import services from './services/persons'
 
 function App() {
   const [persons, setPersons] = useState([])
@@ -12,12 +12,11 @@ function App() {
 
   const hook = () => {
     console.log('effect')
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
+    services.getAll()
+      .then(allPersons => {
         console.log('promise fulfilled')
-        setPersons(response.data)
-        console.log(response.data)
+        setPersons(allPersons)
+        console.log(allPersons)
       })
   }
 
@@ -37,12 +36,32 @@ function App() {
 
   const handleAddClick = (event) => {
     event.preventDefault()
+    let existingPerson = persons.find(person => person.name === newName)
     if (persons.find(person => person.name === newName)) {
-      alert(`${newName} already exists`)
+      if (window.confirm(`${newName} already exists. Do you want to update their number?`)) {
+        services.updateNumber({...existingPerson, number: newNumber})
+                .then(updatedPerson => {
+                  console.log('update fulfilled')
+                  console.log(updatedPerson)
+                  setPersons(persons.map(person => person.id !== updatedPerson.id ? person : updatedPerson))
+                })
+      }
+
     } else {
-      setPersons(persons.concat({ name: newName, number: newNumber, id: (persons.length + 1) }))
-      setNewNumber('')
-      setNewName('')
+      services.addPerson({name: newName, number: newNumber})
+              .then(newPerson => {
+                console.log(newPerson)
+                setPersons(persons.concat(newPerson))
+                setNewNumber('')
+                setNewName('')
+              }) 
+    }
+  }
+
+  const handleDelete = (personToDelete) => {
+    return () => {
+      services.deletePerson(personToDelete)
+      setPersons(persons.filter(person => person.id !== personToDelete.id))
     }
   }
 
@@ -63,7 +82,7 @@ function App() {
         onClick={handleAddClick}/>
       <h2>Numbers</h2>
       <ul>
-        <Persons persons={filterNames()}/>
+        <Persons persons={filterNames()} onDelete={handleDelete}/>
       </ul>
     </div>
   );
