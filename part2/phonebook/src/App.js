@@ -4,11 +4,39 @@ import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import services from './services/persons'
 
+const Alert = ({ alertMessage }) => {
+  const alertStyle = {
+    color: 'green',
+    background: 'lightgrey',
+    fontSize: 20,
+    borderStyle: 'solid',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+
+  }
+
+
+  if (alertMessage) {
+    return (
+      <div style={alertStyle}>
+        {alertMessage}
+      </div>
+    )
+  } else {
+    return (
+      <div></div>
+    )
+  }
+
+}
+
 function App() {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [newFilter, setNewFilter] = useState('')
+  const [alertMessage, setAlertMessage] = useState(null)
 
   const hook = () => {
     console.log('effect')
@@ -45,6 +73,12 @@ function App() {
                   console.log(updatedPerson)
                   setPersons(persons.map(person => person.id !== updatedPerson.id ? person : updatedPerson))
                 })
+                .catch(error => {
+                  setAlertMessage(`${newName} was already deleted`)
+                  setTimeout(() => {
+                    setAlertMessage(null)
+                  }, 3000)
+                })
       }
 
     } else {
@@ -54,6 +88,10 @@ function App() {
                 setPersons(persons.concat(newPerson))
                 setNewNumber('')
                 setNewName('')
+                setAlertMessage(`Added ${newPerson.name}`)
+                setTimeout(() => {
+                  setAlertMessage(null)
+                }, 3000)
               }) 
     }
   }
@@ -61,7 +99,15 @@ function App() {
   const handleDelete = (personToDelete) => {
     return () => {
       services.deletePerson(personToDelete)
-      setPersons(persons.filter(person => person.id !== personToDelete.id))
+        .then(response => {
+          setPersons(persons.filter(person => person.id !== personToDelete.id))
+        })
+        .catch(error => {
+          setAlertMessage(`${personToDelete.name} was already deleted`)
+          setTimeout(() => {
+            setAlertMessage(null)
+          }, 3000)
+        })
     }
   }
 
@@ -72,6 +118,7 @@ function App() {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Alert alertMessage={alertMessage} />
       <Filter value={newFilter} onChange={handleFilterChange}/>
       <h2>add a new</h2>
       <PersonForm 
